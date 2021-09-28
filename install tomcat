@@ -1,0 +1,40 @@
+---
+- name: install tomcat
+  hosts: all 
+  become: true
+  tasks: 
+# install java on RHEL servers
+  - name: install java on Redhatservers
+    yum:
+      name: java
+      state: installed
+    when: ansible_os_family=="RedHat"
+  # install java on ubuntu servers
+  - name: install java on debian
+    apt:
+      name: default_jdk
+      state: present
+    when: ansible_os_family=="debian" 
+  # download tomcat
+  - name: download tomcat package
+    get_url: 
+      url: https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.71/bin/apache-tomcat-8.5.71.tar.gz       
+      dest: /opt
+  # unzip package
+  - name: unzip package
+    unarchive:
+      src: /opt/apache-tomcat-8.5.71.tar.gz
+      dest: /opt
+      remote_src: yesgit add
+
+  # add permissions to startup.sh
+  - name: add permissions
+    file:
+      path:  /opt/apache-tomcat-8.5.71/bin/startup.sh
+      mode: 0777
+
+  # stsrt service
+  - name: start tomcat service
+    shell: nohup ./startup.sh
+    args:
+      chdir: /opt/apache-tomcat-8.5.71/bin        
